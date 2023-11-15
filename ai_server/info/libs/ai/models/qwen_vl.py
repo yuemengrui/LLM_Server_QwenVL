@@ -81,6 +81,8 @@ class QwenVL:
         if history is None:
             history = []
 
+        true_history = []
+
         if chat_format == "chatml":
             im_start, im_end = "<|im_start|>", "<|im_end|>"
             im_start_tokens = [self.tokenizer.im_start_id]
@@ -121,6 +123,7 @@ class QwenVL:
                 if current_context_size < max_window_size:
                     context_tokens = next_context_tokens + context_tokens
                     raw_text = prev_chat + raw_text
+                    true_history.insert(0, [turn_query, turn_response])
                 else:
                     break
 
@@ -144,7 +147,7 @@ class QwenVL:
         else:
             raise NotImplementedError(f"Unknown chat format {chat_format!r}")
 
-        return raw_text, context_tokens
+        return raw_text, context_tokens, true_history
 
     def token_counter(self, prompt):
         return len(self.tokenizer(prompt, return_tensors="pt").input_ids[0])
@@ -166,7 +169,7 @@ class QwenVL:
 
         query = self.tokenizer.from_list_format(prompt)
 
-        raw_text, context_tokens = self.make_context(query=query, history=history)
+        raw_text, context_tokens, history = self.make_context(query=query, history=history)
         prompt_tokens = len(context_tokens)
         if self.logger:
             self.logger.info({'raw_text': raw_text, 'prompt_tokens': prompt_tokens})
