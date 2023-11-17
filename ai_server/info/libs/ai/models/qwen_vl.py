@@ -215,7 +215,7 @@ class QwenVL:
                     # image.save('xx.jpg')
                     image = Image.fromarray(
                         self.tokenizer.draw_bbox_on_latest_picture(response, temp_history).get_image())
-                    resp.update({"type": "image", "image": pil_base64(image)})
+                    resp.update({"type": "image", "image": pil_base64(image), "answer": "绘图完成"})
                     yield resp
 
             return stream_generator()
